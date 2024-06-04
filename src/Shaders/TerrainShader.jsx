@@ -24,10 +24,22 @@ const TerrainShaderMaterial = shaderMaterial(
   fragmentShader
 )
 
-extend({ TerrainShaderMaterial })
+const TerrainDepthMaterial = shaderMaterial(
+  {
+    uTime: 0,
+    uPositionFrequency: 0.2,
+    uStrength: 2.0,
+    uWarpFrequency: 5,
+    uWarpStrength: 0.5
+  },
+  vertexShader
+)
+
+extend({ TerrainShaderMaterial, TerrainDepthMaterial })
 
 export default function TerrainShader() {
   const materialRef = useRef()
+  const depthMaterialRef = useRef()
 
   const { uPositionFrequency, uStrength, uWarpFrequency, uWarpStrength, uColorWaterDeep, uColorWaterSurface, uColorSand, uColorGrass, uColorSnow, uColorRock } = useControls({
     uPositionFrequency: { value: 0.2, min: 0, max: 1, step: 0.001 },
@@ -43,18 +55,30 @@ export default function TerrainShader() {
   })
 
   useFrame((state, delta) => {
-    if (materialRef.current) {
-      materialRef.current.uTime += delta
-      materialRef.current.uPositionFrequency = uPositionFrequency
-      materialRef.current.uStrength = uStrength
-      materialRef.current.uWarpFrequency = uWarpFrequency
-      materialRef.current.uWarpStrength = uWarpStrength
-      materialRef.current.uColorWaterDeep = new THREE.Color(uColorWaterDeep)
-      materialRef.current.uColorWaterSurface = new THREE.Color(uColorWaterSurface)
-      materialRef.current.uColorSand = new THREE.Color(uColorSand)
-      materialRef.current.uColorGrass = new THREE.Color(uColorGrass)
-      materialRef.current.uColorSnow = new THREE.Color(uColorSnow)
-      materialRef.current.uColorRock = new THREE.Color(uColorRock)
+    if (materialRef.current && depthMaterialRef.current) {
+
+      const material = materialRef.current
+      const depthMaterial = depthMaterialRef.current
+
+      material.uTime += delta
+      depthMaterial.uTime += delta
+
+      material.uPositionFrequency = uPositionFrequency
+      material.uStrength = uStrength
+      material.uWarpFrequency = uWarpFrequency
+      material.uWarpStrength = uWarpStrength
+      material.uColorWaterDeep = new THREE.Color(uColorWaterDeep)
+      material.uColorWaterSurface = new THREE.Color(uColorWaterSurface)
+      material.uColorSand = new THREE.Color(uColorSand)
+      material.uColorGrass = new THREE.Color(uColorGrass)
+      material.uColorSnow = new THREE.Color(uColorSnow)
+      material.uColorRock = new THREE.Color(uColorRock)
+
+      // Depth material updates
+      depthMaterial.uPositionFrequency = uPositionFrequency
+      depthMaterial.uStrength = uStrength
+      depthMaterial.uWarpFrequency = uWarpFrequency
+      depthMaterial.uWarpStrength = uWarpStrength
     }
   })
 
@@ -62,6 +86,7 @@ export default function TerrainShader() {
     <mesh position-y={-1} rotation-x={-Math.PI * 0.5} scale={10}>
       <planeGeometry args={[10, 10, 500, 500]} />
       <terrainShaderMaterial ref={materialRef} />
+      <meshDepthMaterial ref={depthMaterialRef} depthPacking={THREE.RGBADepthPacking} />
     </mesh>
   )
 }
