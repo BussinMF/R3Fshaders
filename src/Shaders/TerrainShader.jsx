@@ -23,7 +23,6 @@ const TerrainShaderMaterial = shaderMaterial(
   vertexShader,
   fragmentShader
 )
-
 extend({ TerrainShaderMaterial })
 
 export default function TerrainShader() {
@@ -59,7 +58,7 @@ export default function TerrainShader() {
   })
 
   return (
-    <mesh position-y={-1} rotation-x={-Math.PI * 0.5} scale={10}>
+    <mesh scale={10} rotation-x={-Math.PI * 0.5}>
       <planeGeometry args={[10, 10, 500, 500]} />
       <terrainShaderMaterial ref={materialRef} />
     </mesh>
